@@ -13,6 +13,7 @@ Zoom Clone using NodeJS, WebRTC and Websocket.
 5. npm i @babel/preset-env -D
 6. npm i express
 7. npm i pug
+8. npm i ws
 
 
 
