@@ -1,5 +1,5 @@
 import express from 'express';
-import WebSocket from 'ws';
+import SocketIO from 'socket.io';
 import http from 'http';
 
 const app = express();
@@ -13,38 +13,24 @@ app.get('/', (req, res) => {
   res.render('home');
 });
 
-const hadleListen = () => {
-  console.log(`Server is running on port ${PORT}`);
-}
-
+// HTTP Server
 const server = http.createServer(app); 
-const wss = new WebSocket.Server({ server });
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
 
-const handleConnection = (socket) => {
-  console.log("conneted to Browser");
-
-  sockets.push(socket);
-  socket['nickname'] = 'Anon';
-  
-  socket.on('close', () => console.log('Disconnected from the Browser'));
-  socket.on('message', (message) => {
-    const parsedMessage = JSON.parse(message);
-
-    switch (parsedMessage.type) {
-      case 'new_message':
-        sockets.forEach((aSocket) => aSocket.send(`${socket.nickname}: ${parsedMessage.payload}`));
-        break;
-      case 'nickname':
-        socket['nickname'] = parsedMessage.payload;
-        break;
-    }
-    
+// SocketIO
+const wsServer = SocketIO(server);
+wsServer.on('connection', (socket) => {
+  socket.onAny((event) => {
+    console.log(`Socket Event: ${event}`);
   });
-};
+  socket.on('enter_room', (data, callback) => {
+    console.log(socket.id);
+    console.log(socket.rooms);
+    socket.join(data);
+    callback(data.payload);
+  });
+});
 
-const sockets = [];
-
-wss.on('connection', handleConnection);
-
-server.listen(PORT, hadleListen);
  
